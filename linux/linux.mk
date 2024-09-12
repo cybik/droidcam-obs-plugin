@@ -5,6 +5,8 @@
 ALLOW_STATIC ?= no    # Allow static linking some deps
 ENABLE_GUI   ?= no    # Enable Gui components (links with Qt)
 
+DISABLE_ADB  ?= yes
+
 # libimobiledevice for static linking
 IMOBILEDEV_DIR ?= /opt/libimobiledevice
 IMOBILEDEV_LIB ?= $(IMOBILEDEV_DIR)/lib
@@ -27,6 +29,9 @@ define ADD_Lib =
 	INCLUDES += $(shell pkg-config --cflags-only-I  $(1))
 	LDD_LIBS += $(shell pkg-config --libs-only-l  $(1))
 endef
+ifeq "$(DISABLE_ADB)" "yes"
+	CXXFLAGS += -D_DISABLE_ADB
+endif
 
 ifeq "$(ALLOW_STATIC)" "yes"
 	CXXFLAGS += -DALLOW_STATIC

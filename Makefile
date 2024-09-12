@@ -6,7 +6,7 @@ LIB_DLL   ?= $(BUILD_DIR)/droidcam-obs.so
 
 RM       ?= rm -f
 CXX      ?= g++
-CXXFLAGS += -std=c++17 -Wall -fPIC
+CXXFLAGS += -std=c++17 -Wall -fPIC -g
 INCLUDES += -Isrc/
 STATIC   +=
 LDD_DIRS +=
@@ -14,7 +14,13 @@ LDD_LIBS +=
 LDD_FLAG +=
 SRC      += $(shell ls src/*.cc src/sys/unix/*.cc)
 
+DEBUGGABLE  ?= yes
+
 .PHONY: run clean
+
+ifeq "$(DEBUGGABLE)" "yes"
+CXXFLAGS += -g
+endif
 
 all: $(BUILD_DIR) $(LIB_DLL)
 debug: CXXFLAGS += -DDEBUG

@@ -51,7 +51,9 @@ extern const char* bindIP;
 
 struct droidcam_obs_source {
     Tally_t tally;
+#ifndef _DISABLE_ADB
     AdbMgr adbMgr;
+#endif
     USBMux iosMgr;
     MDNS mdnsMgr;
     Decoder* video_decoder;
@@ -104,7 +106,9 @@ static void signal_source_update(obs_source_t* source, const char* battery_level
 
 static socket_t connect(struct droidcam_obs_source *plugin) {
     Device* dev;
+    #ifndef _DISABLE_ADB
     AdbMgr* adbMgr = &plugin->adbMgr;
+    #endif
     USBMux* iosMgr = &plugin->iosMgr;
     MDNS  *mdnsMgr = &plugin->mdnsMgr;
 
@@ -125,6 +129,7 @@ static socket_t connect(struct droidcam_obs_source *plugin) {
         mdnsMgr->Reload();
         goto out;
     }
+#ifndef _DISABLE_ADB
 
     if (device_info->type == DeviceType::ADB) {
         dev = adbMgr->GetDevice(device_info->id);
@@ -159,7 +164,7 @@ static socket_t connect(struct droidcam_obs_source *plugin) {
         adbMgr->Reload();
         goto out;
     }
-
+#endif
     if (device_info->type == DeviceType::IOS) {
         dev = iosMgr->GetDevice(device_info->id);
         if (dev) {
@@ -389,10 +394,12 @@ static void *video_thread(void *data) {
                 plugin->mdnsMgr.Reload();
                 plugin->mdnsMgr.ResetIter();
                 break;
+#ifndef _DISABLE_ADB
             case DeviceType::ADB:
                 plugin->adbMgr.Reload();
                 plugin->adbMgr.ResetIter();
                 break;
+#endif
             case DeviceType::IOS:
                 plugin->iosMgr.Reload();
                 plugin->iosMgr.ResetIter();
@@ -446,8 +453,12 @@ static void *video_thread(void *data) {
             plugin->video_running = true;
             dlog("starting video via socket %d", sock);
 
-            int port = (plugin->device_info.type == DeviceType::ADB
-                    || plugin->device_info.type == DeviceType::IOS)
+            int port = (
+#ifndef _DISABLE_ADB
+                        plugin->device_info.type == DeviceType::ADB ||
+#endif
+                        plugin->device_info.type == DeviceType::IOS
+            )
                 ? plugin->usb_port
                 : plugin->device_info.port;
 
@@ -1022,7 +1033,9 @@ void resolve_device_type(struct active_device_info *device_info, void* data) {
     droidcam_obs_source *plugin = (droidcam_obs_source*)(data);
 
     Device* dev;
+#ifndef _DISABLE_ADB
     AdbMgr* adbMgr = &plugin->adbMgr;
+#endif
     USBMux* iosMgr = &plugin->iosMgr;
     MDNS  *mdnsMgr = &plugin->mdnsMgr;
 
@@ -1032,7 +1045,7 @@ void resolve_device_type(struct active_device_info *device_info, void* data) {
         device_info->type = DeviceType::MDNS;
         return;
     }
-
+#ifndef _DISABLE_ADB
     dev = adbMgr->GetDevice(id);
     if (dev) {
         if (adbMgr->DeviceOffline(dev)) {
@@ -1044,7 +1057,7 @@ void resolve_device_type(struct active_device_info *device_info, void* data) {
         device_info->type = DeviceType::ADB;
         return;
     }
-
+#endif
     dev = iosMgr->GetDevice(id);
     if (dev) {
         device_info->ip = localhost_ip;
@@ -1194,7 +1207,9 @@ static bool connect_clicked(obs_properties_t *ppts, obs_property_t *p, void *dat
 static bool refresh_clicked(obs_properties_t *ppts, obs_property_t *p, void *data) {
     droidcam_obs_source *plugin = (droidcam_obs_source*)(data);
     Device* dev;
+#ifndef _DISABLE_ADB
     AdbMgr *adbMgr = &plugin->adbMgr;
+#endif
     USBMux* iosMgr = &plugin->iosMgr;
     MDNS  *mdnsMgr = &plugin->mdnsMgr;
     obs_property_t *cp = obs_properties_get(ppts, OPT_CONNECT);
@@ -1209,12 +1224,14 @@ static bool refresh_clicked(obs_properties_t *ppts, obs_property_t *p, void *dat
     }
 
     mdnsMgr->Reload();
+#ifndef _DISABLE_ADB
     adbMgr->Reload();
+#endif
     iosMgr->Reload();
 
     p = obs_properties_get(ppts, OPT_DEVICE_LIST);
     obs_property_list_clear(p);
-
+#ifndef _DISABLE_ADB
     adbMgr->ResetIter();
     while ((dev = adbMgr->NextDevice()) != NULL) {
         adbMgr->GetModel(dev);
@@ -1224,7 +1241,7 @@ static bool refresh_clicked(obs_properties_t *ppts, obs_property_t *p, void *dat
         if (adbMgr->DeviceOffline(dev))
             obs_property_list_item_disable(p, idx, true);
     }
-
+#endif
     iosMgr->ResetIter();
     while ((dev = iosMgr->NextDevice()) != NULL) {
         iosMgr->GetModel(dev);
@@ -1302,10 +1319,12 @@ obs_properties_t *source_properties(void *data) {
     cp = obs_properties_get(ppts, OPT_DEVICE_LIST);
     if (plugin) {
         Device* dev;
+#ifndef _DISABLE_ADB
         AdbMgr *adbMgr = &plugin->adbMgr;
+#endif
         USBMux* iosMgr = &plugin->iosMgr;
         MDNS  *mdnsMgr = &plugin->mdnsMgr;
-
+#ifndef _DISABLE_ADB
         adbMgr->ResetIter();
         while ((dev = adbMgr->NextDevice()) != NULL) {
             char *label = dev->model[0] != 0 ? dev->model : dev->serial;
@@ -1313,6 +1332,7 @@ obs_properties_t *source_properties(void *data) {
             if (adbMgr->DeviceOffline(dev))
                 obs_property_list_item_disable(cp, idx, true);
         }
+#endif
 
         iosMgr->ResetIter();
         while ((dev = iosMgr->NextDevice()) != NULL) {

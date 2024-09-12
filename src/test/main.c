@@ -182,7 +182,9 @@ int main(int argc, char** argv) {
 
     net_init();
     test_exec();
+    #ifndef _DISABLE_ADB
     test_adb();
+    #endif
     #ifdef __APPLE__
     test_ios();
     #endif
