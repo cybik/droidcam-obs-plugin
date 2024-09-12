@@ -1,0 +1,10 @@
+export LIBUSBMUXD=libusbmuxd-2.0
+export LIBIMOBILEDEV=libimobiledevice-1.0
+export ALLOW_STATIC=no
+export ENABLE_GUI=yes
+export DEBUGGABLE=yes
+#export DROIDCAM_OVERRIDE=yes
+
+[ -d build ] && { rm -rf build; }
+mkdir -p build
+make
