@@ -7,9 +7,9 @@ LIB_DLL   ?= $(BUILD_DIR)/droidcam-obs.so
 MOC      ?= /usr/bin/moc
 UIC      ?= /usr/bin/uic
 RM       ?= rm -f
-CXX      ?= g++
+CXX      = clang++
 CXXFLAGS += -std=c++17 -Wall -fPIC
-INCLUDES += -Isrc/
+INCLUDES += -Isrc/ -I/usr/include/x86_64-linux-gnu/libavcodec
 STATIC   +=
 LDD_DIRS +=
 LDD_LIBS +=

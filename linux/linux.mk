@@ -3,7 +3,7 @@
 # Example: `ALLOW_STATIC=yes  make`
 
 ALLOW_STATIC ?= no    # Allow static linking some deps
-ENABLE_GUI   ?= no    # Enable Gui components (links with Qt)
+ENABLE_GUI   ?= yes    # Enable Gui components (links with Qt)
 
 # libimobiledevice for static linking
 IMOBILEDEV_DIR ?= /opt/libimobiledevice
@@ -15,12 +15,12 @@ JPEG_LIB ?= $(JPEG_DIR)/lib$(shell getconf LONG_BIT)
 
 # other overrides
 LIBOBS_INCLUDES ?= /usr/include/obs
-FFMPEG_INCLUDES ?= /usr/include/ffmpeg
+FFMPEG_INCLUDES ?= /usr/include/x86_64-linux-gnu/libavcodec
 
 # dynamic linking library names
 LIBTURBOJPEG   ?= libturbojpeg
-LIBUSBMUXD     ?= libusbmuxd
-LIBIMOBILEDEV  ?= libimobiledevice
+LIBUSBMUXD     ?= libusbmuxd-2.0
+LIBIMOBILEDEV  ?= libimobiledevice-1.0
 
 #
 define ADD_Lib =
